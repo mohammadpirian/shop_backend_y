@@ -1,27 +1,21 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { BlogDto } from './dtos/blog.dto.js';
+import { InjectModel } from '@nestjs/mongoose';
+import { Blog } from './schemas/blog.schema.js';
+import { Model } from 'mongoose';
 
 @Injectable()
 export class BlogService {
-  private blogs = [
-    {
-      _id: 1,
-      title: 'title 1',
-      content: 'content 1',
-    },
-    {
-      _id: 2,
-      title: 'title 2',
-      content: 'content 2',
-    },
-  ];
+  constructor(
+    @InjectModel(Blog.name) private readonly blogModel: Model<Blog>,
+  ) {}
 
-  findAll() {
-    return this.blogs;
+  async findAll() {
+    return await this.blogModel.find().exec();
   }
 
-  findOne(id: string) {
-    const blog = this.blogs.find((item) => item._id.toString() === id);
+  async findOne(id: string) {
+    const blog = await this.blogModel.findOne({ _id: id }).exec();
 
     if (blog) {
       return blog;
@@ -30,27 +24,26 @@ export class BlogService {
     }
   }
 
-  create(body: BlogDto) {
-    const id = Math.random();
-    const newBlog = { ...body, _id: id };
-    this.blogs.push(newBlog);
+  async create(body: BlogDto) {
+    const newBlog = new this.blogModel(body);
+
+    await newBlog.save();
 
     return newBlog;
   }
 
-  update(id: string, body: BlogDto) {
-    const blog = this.findOne(id);
+  async update(id: string, body: BlogDto) {
+    const blog = await this.findOne(id);
 
     blog.title = body.title;
     blog.content = body.content;
 
+    await blog.save();
     return blog;
   }
 
-  delete(id: string) {
-    const blog = this.findOne(id);
-    const newBlogs = this.blogs.filter((item) => item._id !== blog._id);
-
-    this.blogs = newBlogs;
+  async delete(id: string) {
+    const blog = await this.findOne(id);
+    await blog.deleteOne();
   }
 }
