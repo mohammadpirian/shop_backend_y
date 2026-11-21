@@ -11,6 +11,7 @@ import {
 import { ApiTags } from '@nestjs/swagger';
 import { BlogDto } from './dtos/blog.dto.js';
 import { BlogService } from './blog.service.js';
+import { BlogQueryDto } from './dtos/blog-query.dto.js';
 
 @ApiTags('Blog')
 @Controller('blog')
@@ -18,8 +19,8 @@ export class BlogController {
   constructor(private readonly blogService: BlogService) {}
 
   @Get()
-  findAll(@Query() queryParams: any) {
-    return this.blogService.findAll();
+  findAll(@Query() queryParams: BlogQueryDto) {
+    return this.blogService.findAll(queryParams);
   }
 
   @Post()

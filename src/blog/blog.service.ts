@@ -3,6 +3,7 @@ import { BlogDto } from './dtos/blog.dto.js';
 import { InjectModel } from '@nestjs/mongoose';
 import { Blog } from './schemas/blog.schema.js';
 import { Model } from 'mongoose';
+import { BlogQueryDto } from './dtos/blog-query.dto.js';
 
 @Injectable()
 export class BlogService {
@@ -10,8 +11,17 @@ export class BlogService {
     @InjectModel(Blog.name) private readonly blogModel: Model<Blog>,
   ) {}
 
-  async findAll() {
-    return await this.blogModel.find().exec();
+  async findAll(queryParams: BlogQueryDto) {
+    const { limit = 5, page = 1, title } = queryParams;
+    const blogs = await this.blogModel
+      .find()
+      .skip(page - 1)
+      .limit(limit)
+      .exec();
+
+    const count = await this.blogModel.countDocuments();
+
+    return { count, blogs };
   }
 
   async findOne(id: string) {
