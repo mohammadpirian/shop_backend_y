@@ -6,17 +6,21 @@ import {
   Param,
   Post,
   Put,
+  Query,
 } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
+import { BlogDto } from './dtos/blog.dto.js';
 
+@ApiTags('Blog')
 @Controller('blog')
 export class BlogController {
   @Get()
-  findAll() {
+  findAll(@Query() queryParams: any) {
     return 'find all';
   }
 
   @Post()
-  create(@Body() body: any) {
+  create(@Body() body: BlogDto) {
     console.log(body);
     return 'create';
   }
@@ -32,7 +36,7 @@ export class BlogController {
   }
 
   @Put(':id')
-  update(@Param('id') id: string, @Body() body: any) {
+  update(@Param('id') id: string, @Body() body: BlogDto) {
     console.log(body);
     return `update: ${id}`;
   }
